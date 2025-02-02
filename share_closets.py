@@ -65,12 +65,29 @@ class PoshmarkConstants:
 
 
 class PoshmarkDriver:
-    def __init__(self, poshmark_username, loop_delay, pages, num_items):
+    '''
+    Class for running the webdriver to navigate Poshmark
+    '''
+    def __init__(
+            self,
+            poshmark_username,
+            loop_delay,
+            pages,
+            num_items):
+
+        # Poshmark username used to login
         self.poshmark_username = poshmark_username
+
+        # Amount of time to wait between running share closeet loop
         self.loop_delay = loop_delay
+
+        # Number of pages to scroll for each closet
         self.pages = pages
+
+        # Number of items to share for each closet
         self.num_items = num_items
-        self.starttime = time.time()
+
+        # Webdriver.  Gets instantiated, then removed during run_driver_loop
         self.driver = None
 
     @staticmethod
@@ -158,7 +175,7 @@ class PoshmarkDriver:
             print(f'        {seller} closet has less than {num_items} available items; moving on.\n')
             return
 
-        # Preserve the order of the closet items
+        # To share the oldest closet items first, reverse the order of the list
         share_icons.reverse()
 
         # Select a random number of items to share from the closet (if num_items is > 0)
@@ -231,6 +248,8 @@ def main():
 
     # if args.self is selected, set the value of args.num_items to 0 (use all)
     num_items = 0 if args.self else args.num_items
+
+
     poshmark_driver = PoshmarkDriver(poshmark_username, args.time, args.pages, num_items)
 
     if args.self or args.account:
