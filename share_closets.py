@@ -1,11 +1,13 @@
 import os
 import sys
 import time
+import traceback
 from random import random, randint
 import numpy as np
 from tqdm import tqdm
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import InvalidSessionIdException, NoSuchElementException, NoSuchWindowException, StaleElementReferenceException
 from parse_arguments import parse_args
 
 class PoshmarkHelpers:
@@ -62,6 +64,9 @@ class PoshmarkConstants:
 
     class Following:
         follower_class = "//p[@class='follow__action__follower caption ellipses tc--lg']"
+
+    class Captcha:
+        captcha_div = "//div[@class='d--fl  jc--c g-recaptcha-con']"
 
 
 class PoshmarkDriver:
@@ -159,6 +164,24 @@ class PoshmarkDriver:
         return share_icons
 
     def click_share_to_followers(self, share_icon):
+        # Click the share icon, then wait 2 seconds
+        self.driver.execute_script(PoshmarkConstants.Actions.click, share_icon)
+        time.sleep(2)
+
+        # Find the element to share to followers
+        share_followers = self.driver.find_element_by_xpath(PoshmarkConstants.Share.internal_share_class)
+
+        # Click share to followers, then wait 2 seconds
+        self.driver.execute_script(PoshmarkConstants.Actions.click, share_followers)
+        time.sleep(2)
+
+        # Check to see if there is a captcha
+        try:
+            captcha = self.driver.find_element_by_xpath(PoshmarkConstants.Captcha.captcha_div)
+        except NoSuchElementException:
+            return
+
+        out = input(f'Encountered captcha.  Please hit enter once you have completed it.\n\n')
         self.driver.execute_script(PoshmarkConstants.Actions.click, share_icon)
         time.sleep(2)
         share_followers = self.driver.find_element_by_xpath(PoshmarkConstants.Share.internal_share_class)
@@ -186,7 +209,21 @@ class PoshmarkDriver:
 
         # Share the closet listings
         for item in tqdm(share_icons, total=len(share_icons), desc='        '):
-            self.click_share_to_followers(item)
+            try:
+                self.click_share_to_followers(item)
+            except InvalidSessionIdException as exc:
+                print(f'Invalid Session Id: {exc}')
+                traceback.print_exc(file=sys.stdout)
+            except NoSuchElementException as exc:
+                print(f'No Such Element: {exc}')
+                traceback.print_exc(file=sys.stdout)
+            except StaleElementReferenceException as exc:
+                print(f'Stale Element: {exc}')
+                traceback.print_exc(file=sys.stdout)
+            except NoSuchWindowException as exc:
+                print(f'No Such Window: {exc}')
+                traceback.print_exc(file=sys.stdout)
+                break
         print('\n')
 
     def run_driver(self, poshmark_password, seller=None, num_following=0):
@@ -198,10 +235,21 @@ class PoshmarkDriver:
             sellers = self.get_following_usernames(num_following)
         for i, seller in enumerate(sellers):
             print(f'    {seller} ({i} of {len(sellers)})')
-            self.share_listings(seller)
+            try:
+                self.share_listings(seller)
+            except InvalidSessionIdException as exc:
+                print(f'Invalid Session Id 2: {exc}')
+                traceback.print_exc(file=sys.stdout)
+            except NoSuchWindowException as exc:
+                # if this exception is encountered, the window has been closed.
+                print(f'No Such Window: {exc}')
+                traceback.print_exc(file=sys.stdout)
+                self.driver = None
+                break
 
         time.sleep(3)
-        self.driver.close()
+        if self.driver is not None:
+            self.driver.close()
         self.driver = None
 
     def get_following_usernames(self, num_following):
