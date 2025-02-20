@@ -63,6 +63,10 @@ class PoshmarkConstants:
         credentials_path = './credentials.py'
 
     class Following:
+        # Number of sellers listed on each page while scrolling followers
+        num_sellers_per_page = 48
+        follower_count = "//div[@class='navigation--horizontal__link cursor--pointer navigation--horizontal__link--selected']"
+        follower_count2 = "//[@data-test='closet_following_count']"
         follower_class = "//p[@class='follow__action__follower caption ellipses tc--lg']"
 
     class Captcha:
@@ -142,10 +146,12 @@ class PoshmarkDriver:
         scroll = 0
         screen_heights = [0]
         for i in range(pages):
+            print(f'page {i}')
             scroll +=1
             self.driver.execute_script(PoshmarkConstants.Actions.scroll)
             height = self.driver.execute_script(PoshmarkConstants.Actions.get_height)
             last_height = screen_heights[-1:][0]
+            time.sleep(2)
 
             if height == last_height:
                 return
@@ -234,7 +240,7 @@ class PoshmarkDriver:
             try:
                 self.share_listings(seller)
             except InvalidSessionIdException as exc:
-                print(f'Invalid Session Id 2: {exc}')
+                print(f'Invalid Session Id: {exc}')
                 traceback.print_exc(file=sys.stdout)
             except NoSuchWindowException as exc:
                 # if this exception is encountered, the window has been closed.
@@ -252,7 +258,15 @@ class PoshmarkDriver:
         url = PoshmarkConstants.URLs.get_user_following(self.poshmark_username)
         self.driver.get(url)
         time.sleep(3)
-        self.scroll_page(8)
+        try:
+            total_following_element = self.driver.find_elements_by_xpath(
+                PoshmarkConstants.Following.follower_count)
+            all_following = int(total_following_element[0].text.split('\n')[0])
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            raise Exception(f'Error finding total number of sellers following')
+        pages_to_scroll = all_following // PoshmarkConstants.Following.num_sellers_per_page
+        self.scroll_page(pages_to_scroll)
         time.sleep(3)
         follower_elements = self.driver.find_elements_by_xpath(PoshmarkConstants.Following.follower_class)
         followers = [f.text.lstrip('@') for f in follower_elements]
