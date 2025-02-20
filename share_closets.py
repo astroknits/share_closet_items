@@ -182,11 +182,7 @@ class PoshmarkDriver:
             return
 
         out = input(f'Encountered captcha.  Please hit enter once you have completed it.\n\n')
-        self.driver.execute_script(PoshmarkConstants.Actions.click, share_icon)
-        time.sleep(2)
-        share_followers = self.driver.find_element_by_xpath(PoshmarkConstants.Share.internal_share_class)
-        self.driver.execute_script(PoshmarkConstants.Actions.click, share_followers)
-        time.sleep(2)
+        self.click_share_to_followers(share_icon)
 
     def share_listings(self, seller):
         num_items = PoshmarkHelpers.add_jitter(self.num_items)
@@ -296,7 +292,6 @@ def main():
 
     # if args.self is selected, set the value of args.num_items to 0 (use all)
     num_items = 0 if args.self else args.num_items
-
 
     poshmark_driver = PoshmarkDriver(poshmark_username, args.time, args.pages, num_items)
 
