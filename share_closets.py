@@ -66,7 +66,6 @@ class PoshmarkConstants:
         # Number of sellers listed on each page while scrolling followers
         num_sellers_per_page = 48
         follower_count = "//div[@class='navigation--horizontal__link cursor--pointer navigation--horizontal__link--selected']"
-        follower_count2 = "//[@data-test='closet_following_count']"
         follower_class = "//p[@class='follow__action__follower caption ellipses tc--lg']"
 
     class Captcha:
