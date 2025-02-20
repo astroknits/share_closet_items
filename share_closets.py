@@ -76,16 +76,11 @@ class PoshmarkDriver:
     def __init__(
             self,
             poshmark_username,
-            loop_delay,
             pages,
             num_items):
 
         # Poshmark username used to login
         self.poshmark_username = poshmark_username
-
-        # Amount of time to wait between running share closet loop
-        # in seconds
-        self.loop_delay = loop_delay
 
         # Number of pages to scroll for each closet
         self.pages = pages
@@ -93,7 +88,7 @@ class PoshmarkDriver:
         # Number of items to share for each closet
         self.num_items = num_items
 
-        # Webdriver.  Gets instantiated, then removed during run_driver_loop
+        # Webdriver
         self.driver = None
 
     @staticmethod
@@ -177,12 +172,15 @@ class PoshmarkDriver:
 
         # Check to see if there is a captcha
         try:
+            # Try finding the captcha element
             self.driver.find_element_by_xpath(PoshmarkConstants.Captcha.captcha_div)
         except NoSuchElementException:
+            # If captcha element not found, there is no captcha -> move on
             return
 
         # Waits for user input once captcha is completed
         out = input(f'Encountered captcha.  Please hit enter once you have completed it.\n\n')
+
         # Try again once captcha is cleared
         self.click_share_to_followers(share_icon)
 
@@ -265,26 +263,11 @@ class PoshmarkDriver:
             followers = np.random.choice(followers, num_following, replace=False).tolist()
         return followers
 
-    def run_loop_share(self, poshmark_password, seller=None, num_following=0):
-        while True:
-            random_loop_time = PoshmarkHelpers.add_jitter(self.loop_delay)
+    def run_share_for_sellers(self, poshmark_password, seller):
+        self.run_driver(poshmark_password, seller=seller)
 
-            self.run_driver(
-                poshmark_password,
-                seller=seller,
-                num_following=num_following
-            )
-
-            current_time = time.strftime("%I:%M%p on %b %d, %Y")
-            print(f'Will share again in {int(random_loop_time / 60)} minutes.\n'
-                  f'Current time: {current_time}\n\n')
-            PoshmarkHelpers.sleep(random_loop_time)
-
-    def run_loop_share_for_sellers(self, poshmark_password, seller):
-        self.run_loop_share(poshmark_password, seller=seller)
-
-    def run_loop_share_following_users(self, poshmark_password, num_following):
-        self.run_loop_share(poshmark_password, num_following=num_following)
+    def run_share_following_users(self, poshmark_password, num_following):
+        self.run_driver(poshmark_password, num_following=num_following)
 
 
 def main():
@@ -295,10 +278,7 @@ def main():
     # if args.self is selected, set the value of args.num_items to 0 (use all)
     num_items = 0 if args.self else args.num_items
 
-    # convert hours to seconds
-    loop_time = 3600 * args.time # hours to seconds
-
-    poshmark_driver = PoshmarkDriver(poshmark_username, loop_time, args.pages, num_items)
+    poshmark_driver = PoshmarkDriver(poshmark_username, args.pages, num_items)
 
     if args.self or args.account:
         '''
@@ -309,16 +289,16 @@ def main():
             seller = poshmark_username
         else:
             seller = args.account
-        poshmark_driver.run_loop_share_for_sellers(
+        poshmark_driver.run_share_for_sellers(
             poshmark_password,
             seller=seller)
     else:
         '''
         Otherwise, default is to share items from the closets of the sellers you follow
         '''
-        poshmark_driver.run_loop_share_following_users(
+        poshmark_driver.run_share_following_users(
             poshmark_password,
-            args.following)
+            args.num_accounts)
 
 
 
