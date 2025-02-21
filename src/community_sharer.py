@@ -1,5 +1,7 @@
-from poshmark_constants import PoshmarkConstants
-from poshmark_driver import PoshmarkDriver
+import time
+from src.poshmark_constants import PoshmarkConstants
+from src.poshmark_driver import PoshmarkDriver
+
 
 class CommunitySharer(PoshmarkDriver):
     '''
@@ -33,6 +35,10 @@ class CommunitySharer(PoshmarkDriver):
         return [f.text.lstrip('@') for f in follower_elements]
 
     def get_seller_usernames(self, num_following):
+        '''
+        Get a subset of length num_following of the list of
+        sellers the user follows
+        '''
         # Go to the list of sellers the user follows
         url = PoshmarkConstants.URLs.get_user_following(self.poshmark_username)
         self.driver.get(url)
@@ -52,6 +58,10 @@ class CommunitySharer(PoshmarkDriver):
         return sellers
 
     def run(self, poshmark_password, num_following):
+        '''
+        Share self.num_items listings from each closet from
+        a list of num_following sellers being followed by the poshmark user login
+        '''
         self.login(poshmark_password)
         sellers = self.get_seller_usernames(num_following)
         self.run_driver(sellers)

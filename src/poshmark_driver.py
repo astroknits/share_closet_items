@@ -12,8 +12,8 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import NoSuchWindowException
 from selenium.common.exceptions import StaleElementReferenceException
 
-from poshmark_helpers import PoshmarkHelpers
-from poshmark_constants import PoshmarkConstants
+from src.poshmark_helpers import PoshmarkHelpers
+from src.poshmark_constants import PoshmarkConstants
 
 
 

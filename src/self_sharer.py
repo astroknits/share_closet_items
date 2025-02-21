@@ -1,5 +1,5 @@
-from poshmark_constants import PoshmarkConstants
-from poshmark_driver import PoshmarkDriver
+from src.poshmark_constants import PoshmarkConstants
+from src.poshmark_driver import PoshmarkDriver
 
 class SelfSharer(PoshmarkDriver):
     '''
@@ -15,10 +15,16 @@ class SelfSharer(PoshmarkDriver):
         self.pages = 200
 
     def get_num_closet_items(self):
+        '''
+        Get the total number of closet items the user has
+        '''
         self.go_to_seller_closet(self.poshmark_username)
         return self.get_total_count(PoshmarkConstants.Closet.all_listings)
 
     def run(self, poshmark_password):
+        '''
+        Share each available item from the user's own closet
+        '''
         # Log in and instantiate webdriver
         self.login(poshmark_password)
 
@@ -27,7 +33,7 @@ class SelfSharer(PoshmarkDriver):
         total_num_items = self.get_num_closet_items()
 
         # Set number of pages based on 16 items per page
-        self.pages = total_num_items // 16
+        self.pages = total_num_items // PoshmarkConstants.Closet.items_per_page
 
         # scroll through closet
         self.scroll_page(self.pages)

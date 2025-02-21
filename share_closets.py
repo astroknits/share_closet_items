@@ -1,7 +1,7 @@
-from parse_arguments import parse_args
-from poshmark_driver import PoshmarkDriver
-from community_sharer import CommunitySharer
-from self_sharer import SelfSharer
+from src.parse_arguments import parse_args
+from src.poshmark_driver import PoshmarkDriver
+from src.community_sharer import CommunitySharer
+from src.self_sharer import SelfSharer
 
 def main():
     args = parse_args()

@@ -26,6 +26,7 @@ class PoshmarkConstants:
         password_element = "login_form[password]"
 
     class Closet:
+        items_per_page = 16
         share_class = "//div[@class='d--fl ai--c social-action-bar__action social-action-bar__share']"
         share_icon_class = 'share-gray-large'
         all_listings = '//span[@data-test="closet_listings_count"]'
@@ -39,7 +40,7 @@ class PoshmarkConstants:
         internal_share_class = "//a[@class='internal-share__link']"
 
     class Credentials:
-        credentials_path = './credentials.py'
+        credentials_path = 'credentials.py'
 
     class Following:
         # Number of sellers listed on each page while scrolling followers
