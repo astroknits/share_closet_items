@@ -21,20 +21,13 @@ class PoshmarkDriver:
     '''
     Class for running the webdriver to navigate Poshmark
     '''
-    def __init__(
-            self,
-            poshmark_username,
-            pages,
-            num_items):
+    def __init__(self, poshmark_username):
 
         # Poshmark username used to login
         self.poshmark_username = poshmark_username
 
-        # Number of pages to scroll for each closet
-        self.pages = pages
-
-        # Number of items to share for each closet
-        self.num_items = num_items
+        # By default, paginate through the first 3 pages of the user's own closet
+        self.pages = 3
 
         # Webdriver
         self.driver = None
@@ -66,6 +59,8 @@ class PoshmarkDriver:
         return credentials.poshmark_username, credentials.poshmark_password
 
     def login(self, poshmark_password):
+        # create driver
+        self.driver = self.get_driver()
         # Navigate to Poshmark login page
         self.driver.get(PoshmarkConstants.URLs.login)
         time.sleep(3)
@@ -90,7 +85,6 @@ class PoshmarkDriver:
         scroll = 0
         screen_heights = [0]
         for i in range(pages):
-            print(f'page {i}')
             scroll +=1
             self.driver.execute_script(PoshmarkConstants.Actions.scroll)
             height = self.driver.execute_script(PoshmarkConstants.Actions.get_height)
@@ -172,15 +166,9 @@ class PoshmarkDriver:
                 break
         print('\n')
 
-    def run_driver(self, poshmark_password, seller=None, num_following=0):
-        self.driver = self.get_driver()
-        self.login(poshmark_password)
-        time.sleep(4)
-        sellers = [seller]
-        if seller is None:
-            sellers = self.get_following_usernames(num_following)
+    def run_driver(self, sellers):
         for i, seller in enumerate(sellers):
-            print(f'    {seller} ({i} of {len(sellers)})')
+            print(f'    {seller} ({i+1} of {len(sellers)})')
             try:
                 self.share_listings(seller)
             except InvalidSessionIdException as exc:
@@ -198,36 +186,14 @@ class PoshmarkDriver:
             self.driver.close()
         self.driver = None
 
-    def get_following_usernames(self, num_following):
-        url = PoshmarkConstants.URLs.get_user_following(self.poshmark_username)
-        self.driver.get(url)
-        time.sleep(3)
+    def get_total_count(self, xpath):
         try:
-            total_following_element = self.driver.find_elements_by_xpath(
-                PoshmarkConstants.Following.follower_count)
-            all_following = int(total_following_element[0].text.split('\n')[0])
+            total_following_element = self.driver.find_elements_by_xpath(xpath)
+            print(f'got total_following_element: {total_following_element}')
+            return int(total_following_element[0].text)
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
             raise Exception(f'Error finding total number of sellers following')
-        pages_to_scroll = all_following // PoshmarkConstants.Following.num_sellers_per_page
-        self.scroll_page(pages_to_scroll)
-        time.sleep(3)
-        follower_elements = self.driver.find_elements_by_xpath(PoshmarkConstants.Following.follower_class)
-        followers = [f.text.lstrip('@') for f in follower_elements]
-        if num_following == 0 or num_following > len(followers):
-            print(f'Found {len(followers)} followers.  Sharing closet for all.\m')
-        else:
-            print(f'Found {len(followers)} followers.  Of these, selecting {num_following} closets to share.\n')
-            followers = np.random.choice(followers, num_following, replace=False).tolist()
-        return followers
 
-    def run_share_for_sellers(self, poshmark_password, seller):
-        self.run_driver(poshmark_password, seller=seller)
 
-    def run_share_following_users(self, poshmark_password, num_following):
-        self.run_driver(poshmark_password, num_following=num_following)
-
-class CommunitySharer(PoshmarkDriver):
-    def __init__(self, poshmark_username, pages, num_items):
-        pass
 

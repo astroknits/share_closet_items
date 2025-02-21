@@ -6,8 +6,6 @@ def parse_args():
         help="number of closet pages to scroll through")
     parser.add_argument("-n", "--num_items", default=0, type=int,
         help="Number of items to share for each closet (default=0 -> share all)")
-    parser.add_argument("-a", "--account", type=str, default=None,
-        help=('the Poshmark closet account to share'))
     parser.add_argument("-f", "--num_accounts", default=10, type=int,
         help="Share from the closets of random number of sellers you follow (default 10)")
     parser.add_argument ('-s', '--self', action='store_true',

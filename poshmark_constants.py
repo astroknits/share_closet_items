@@ -28,6 +28,7 @@ class PoshmarkConstants:
     class Closet:
         share_class = "//div[@class='d--fl ai--c social-action-bar__action social-action-bar__share']"
         share_icon_class = 'share-gray-large'
+        all_listings = '//span[@data-test="closet_listings_count"]'
 
     class Actions:
         click = "arguments[0].click();"
@@ -43,8 +44,8 @@ class PoshmarkConstants:
     class Following:
         # Number of sellers listed on each page while scrolling followers
         num_sellers_per_page = 48
-        follower_count = "//div[@class='navigation--horizontal__link cursor--pointer navigation--horizontal__link--selected']"
-        follower_class = "//p[@class='follow__action__follower caption ellipses tc--lg']"
+        follower_count = '//span[@data-test="closet_listings_count"]'
+        all_followers = "//p[@class='follow__action__follower caption ellipses tc--lg']"
 
     class Captcha:
         captcha_div = "//div[@class='d--fl  jc--c g-recaptcha-con']"
