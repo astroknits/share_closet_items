@@ -12,12 +12,13 @@ The share_closets.py script can be used for two main purposes:
 2. To share some number of available listings from the closets of a subset of the Poshmark sellers you follow.
 
 Examples
-.1. To share from your own closet, use the `--self` flag.  This will automatically find all available listings in your closet.
+
+1. To share from your own closet, use the `--self` flag.  This will automatically find all available listings in your closet.
 ```commandline
 python share_closets.py --self
 ```
 
-.2a. To share 5 items from each of the closets of 20 of the sellers you follow, run the following:
+2. To share 5 items from each of the closets of 20 of the sellers you follow, run the following:
 ```commandline
 python share_closets.py --num_items 5 --num_accounts 20
 ```
